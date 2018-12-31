@@ -68,14 +68,19 @@ import processing.net.Server;
 
               Amsg = new String(thisClient.readBytes(), "UTF-8");
               name = Amsg.split(";")[0].toString();
-              Bmsg = name + " says: " + Amsg.substring(name.length() + 1);
-              msg = Bmsg;
+              
 
               if (Amsg.split(";")[1].equals("[LEAVE_REQUEST/492/USER-INITIATED]")) {
                 allData = allData + "\n" + name + " has left the server.";
               } else if (Amsg.split(";")[1].equals("[JOIN_REQUEST/491/USER-INITIATED]")) {
                   allData = allData + "\n" + name + " has joined the server.";
+              } else if (Amsg.split(";")[0].toString().equals("[BROADCAST]")) {
+                  System.out.println(Amsg.split(";")[0].toString());
+                  System.out.println(Amsg.split(";")[1].toString());
+                  allData = allData + "\n" + "[BROADCAST] " + Amsg.split(";")[1].toString();
               } else {
+                Bmsg = name + " says: " + Amsg.substring(name.length() + 1);
+                msg = Bmsg;
                 allData = allData + "\n" + msg;
               }
 

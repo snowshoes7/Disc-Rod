@@ -97,26 +97,29 @@ import java.*;
           if (keyCode == ENTER && canSend) { //If the user sends a message, and they can send it,
             if (myText.equals("/exit") || myText.equals("/e")) {
               try {
-              client.write(new String(name + ";" + "[LEAVE_REQUEST/492/USER-INITIATED]").getBytes("UTF-8"));
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
+                client.write(new String(name + ";" + "[LEAVE_REQUEST/492/USER-INITIATED]").getBytes("UTF-8"));
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
               System.exit(0);
             }
             else if (myText.startsWith("/msg ")) {
               try {
-              client.write(new String("[BROADCAST] " + myText.substring(5, myText.length())).getBytes("UTF-8"));
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
+                //System.out.println(new String("[BROADCAST] " + myText.substring(5, myText.length())).getBytes("UTF-8"));
+                client.write(new String("[BROADCAST];" + myText.substring(5, myText.length())).getBytes("UTF-8"));
+                myText = ""; //Nullify string myText.
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
             }
             else {
               try {
-              client.write(new String(name + ";" + myText).getBytes("UTF-8"));
-              myText = ""; //Nullify string myText.
-            } catch (Exception e) {
-              e.printStackTrace();
-            } //Write name and myText to the connected server through the client object.
+                //System.out.println(new String(name + ";" + myText).getBytes("UTF-8"));
+                client.write(new String(name + ";" + myText).getBytes("UTF-8"));
+                myText = ""; //Nullify string myText.
+              } catch (Exception e) {
+                e.printStackTrace();
+              } //Write name and myText to the connected server through the client object.
             }
             canSend = false; //Prevent spam by disallowing sending.
             sendCount = 0;
@@ -156,17 +159,19 @@ import java.*;
             ipEstablished = true; //Setting this variable once more.
             nameEstablished = true; //A name has now been established.
             try {
-            client = new Client(this, host, 10002); //Establish the clientside through Processing.
-            } catch (Exception exception) {
-              exception.printStackTrace();
+              client = new Client(this, host, 10002); //Establish the clientside through Processing.
+            } catch (Exception exceptionn) {
+              exceptionn.printStackTrace();
               System.out.println("Error. You may have used an invalid address.");
+              //System.exit(0);
             }
             try {
-            client.write(new String(name + ";" + "[JOIN_REQUEST/491/USER-INITIATED]").getBytes("UTF-8"));
-          } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Joining the server has failed.");
-          }
+              client.write(new String(name + ";" + "[JOIN_REQUEST/491/USER-INITIATED]").getBytes("UTF-8"));
+            } catch (Exception en) {
+              en.printStackTrace();
+              System.out.println("Joining the server has failed.");
+              //System.exit(0);
+            }
           }
       }
   }
