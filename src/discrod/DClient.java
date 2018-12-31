@@ -1,5 +1,7 @@
 package discrod;
 
+import java.util.Arrays;
+
 import processing.core.PApplet;
 
 import processing.net.*;
@@ -15,6 +17,8 @@ public class DClient extends PApplet {
 	  public boolean ipEstablished = false; //Whether or not the user is connected to a server.
 	  public boolean nameEstablished = false; //Whether or not the user has specified a screen name.
 	  public String name;
+	  public String channeltitle;
+	  public String receivedTextNoTitle;
 	  public int sendCount = 0;
 	  public int blinkVar = 0;
 	  //public int mtcount = 0; Explained below.
@@ -72,7 +76,16 @@ public class DClient extends PApplet {
 	    }
 	    if (receivedText != null && ipEstablished && nameEstablished) { //If text has been received and this client is connected to a server,
 	      //receivedText = "";
-	      text(receivedText, 0, 15); //Render all received text at 0, 15.
+	      
+	      String[] rtarray = receivedText.split(";;;;");
+	      channeltitle = rtarray[0];
+	      //System.out.println(channeltitle);
+	      
+	      String[] tempremovetitle = Arrays.copyOfRange(receivedText.split(";;;;"), 1, receivedText.split(";;;;").length);
+	      receivedTextNoTitle = String.join("", tempremovetitle);
+	      
+	      text(channeltitle, (width/2), 15); //Render the title.
+	      text(receivedTextNoTitle, 0, 15); //Render all received text at 0, 15.
 	      String[] lines = receivedText.split("\r\n|\r|\n");
 	      if (lines.length >= 25) {
 	          receivedText = "";

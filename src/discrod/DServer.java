@@ -6,13 +6,14 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.util.Arrays;
 
 import processing.net.Client;
 import processing.net.Server;
 
 public class DServer extends PApplet {
 
-	public int port = 10002;
+	  public int port = 10002;
 	  public boolean myServerRunning = true;
 	  public int bgColor = 0;
 	  public int direction = 1;
@@ -22,6 +23,10 @@ public class DServer extends PApplet {
 	  public Server myServer;
 
 	  public String allData = "[DATA START]";
+	  public String title = "Main Channel";
+	  public String allDataNoTitle;
+	  
+	  public boolean titleAdded = false;
 
 	  public String permanentMsg;
 
@@ -75,19 +80,24 @@ public class DServer extends PApplet {
 	              } else if (Amsg.split(";")[1].equals("[JOIN_REQUEST/491/USER-INITIATED]")) {
 	                  allData = allData + "\n" + name + " has joined the server.";
 	              } else if (Amsg.split(";")[0].toString().equals("[BROADCAST]")) {
-	                  System.out.println(Amsg.split(";")[0].toString());
-	                  System.out.println(Amsg.split(";")[1].toString());
+	                  //System.out.println(Amsg.split(";")[0].toString());
+	                  //System.out.println(Amsg.split(";")[1].toString());
 	                  allData = allData + "\n" + "[BROADCAST] " + Amsg.split(";")[1].toString();
 	              } else {
 	                Bmsg = name + " says: " + Amsg.substring(name.length() + 1);
 	                msg = Bmsg;
 	                allData = allData + "\n" + msg;
 	              }
-
+	              
+	              if (!titleAdded) {
+	            	  allData = title + ";;;;" + allData;
+	            	  titleAdded = true;
+	              }
+	              
 	              try {
 	                String[] lines = allData.split("\r\n|\r|\n");
 	                    if (lines.length >= 25) {
-	                        allData = "";
+	                        allData = title + ";;;;";
 	                    }
 	              myServer.write(allData.getBytes("UTF-8"));
 	            } catch (UnsupportedEncodingException e) {
@@ -109,7 +119,9 @@ public class DServer extends PApplet {
 	      } else if (refreshCount < 30) {
 	        refreshCount += 1;
 	      }
-	      text(allData, 15, 135);
+	      String[] tempremovetitle = Arrays.copyOfRange(allData.split(";;;;"), 1, allData.split(";;;;").length);
+	      allDataNoTitle = String.join("", tempremovetitle);
+	      text(allDataNoTitle, 15, 135);
 	    }
 	    else
 	    {
