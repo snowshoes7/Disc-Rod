@@ -6,7 +6,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import processing.net.Client;
 import processing.net.Server;
@@ -29,6 +32,10 @@ public class DServer extends PApplet {
 	  public boolean titleAdded = false;
 
 	  public String permanentMsg;
+	  
+	  public List<String> admins = new ArrayList<String>();
+	  
+	  public String toKick;
 
 	  public String ipf;
 
@@ -45,6 +52,11 @@ public class DServer extends PApplet {
 	    } catch (Exception exception) {
 	      System.out.println(exception.getMessage());
 	    }
+	    
+	    //TODO: TAKE THIS OUT AT SOME POINT AND REPLACE IT WITH A PROPER SYSTEM FOR ADDING ADMINS
+	    //RIGHT NOW ALL IT DOES IS MAKE ANY USER WITH NAME "owen" AN ADMIN
+	    admins.add("owen");
+	    
 	  }
 
 	  public void settings() {
@@ -74,19 +86,29 @@ public class DServer extends PApplet {
 	              Amsg = new String(thisClient.readBytes(), "UTF-8");
 	              name = Amsg.split(";")[0].toString();
 	              
-
-	              if (Amsg.split(";")[1].equals("[LEAVE_REQUEST/492/USER-INITIATED]")) {
-	                allData = allData + "\n" + name + " has left the server.";
-	              } else if (Amsg.split(";")[1].equals("[JOIN_REQUEST/491/USER-INITIATED]")) {
-	                  allData = allData + "\n" + name + " has joined the server.";
-	              } else if (Amsg.split(";")[0].toString().equals("[BROADCAST]")) {
-	                  //System.out.println(Amsg.split(";")[0].toString());
-	                  //System.out.println(Amsg.split(";")[1].toString());
-	                  allData = allData + "\n" + "[BROADCAST] " + Amsg.split(";")[1].toString();
-	              } else {
-	                Bmsg = name + " says: " + Amsg.substring(name.length() + 1);
-	                msg = Bmsg;
-	                allData = allData + "\n" + msg;
+	              if (name.equals(toKick)) {
+	            	  thisClient.write(new String("[SYS_KICK_501]").getBytes("UTF-8"));
+	            	  myServer.disconnect(thisClient);
+	              }
+	              
+	              if (!(name.equals(toKick))) {
+	            	  //Do the following if and only if the user has NOT been kicked
+		              if (Amsg.split(";")[1].equals("[LEAVE_REQUEST/492/USER-INITIATED]")) {
+		                allData = allData + "\n" + name + " has left the server.";
+		              } else if (Amsg.split(";")[1].equals("[JOIN_REQUEST/491/USER-INITIATED]")) {
+		                  allData = allData + "\n" + name + " has joined the server.";
+		              } else if (Amsg.split(";")[0].toString().equals("[BROADCAST]")) {
+		                  allData = allData + "\n" + "[BROADCAST] " + Amsg.split(";")[1].toString();
+		              } else if ((Amsg.split(";")[1].toString().equals("[KICK_REQUEST/501/USER-INITIATED]")) && admins.contains(name.toString())) {
+		            	  toKick = Amsg.split(";")[2].toString();
+		            	  allData = allData + "\n" + name + " HAS KICKED " + toKick;
+		              } else if ((Amsg.split(";")[1].toString().equals("[KICK_REQUEST/501/USER-INITIATED]")) && !admins.contains(name.toString())) {
+		            	  //Do nothing
+		              } else {
+		                Bmsg = name + " says: " + Amsg.substring(name.length() + 1);
+		                msg = Bmsg;
+		                allData = allData + "\n" + msg;
+		              }
 	              }
 	              
 	              if (!titleAdded) {
@@ -137,9 +159,33 @@ public class DServer extends PApplet {
 	      } catch (Exception e) {
 	        e.printStackTrace();
 	      }
+	      
 	      myServer.stop();
 	      myServerRunning = false;
 	    }
+	    //The following is supposed to be a method to restart the server with a slight delay, but I have not gotten it to work in testing and so I am leaving it alone for now.
+//	    if (key == 'r') {
+//		      try {
+//		        myServer.write("[SERVER] YOU HAVE BEEN TEMPORARILY DISCONNECTED. Please wait...".getBytes("UTF-8"));
+//		      } catch (Exception e) {
+//		        e.printStackTrace();
+//		      }
+//		      myServer.stop();
+//		      myServerRunning = false;
+//		      
+//		      myServer = new Server(this, port);
+//		      
+//		      try {
+//		  	    URL whatismyip = new URL("http://checkip.amazonaws.com");
+//		  	      BufferedReader in = new BufferedReader(new InputStreamReader(
+//		  	                      whatismyip.openStream()));
+//		  	      ipf = in.readLine(); //you get the IP as a String
+//		  	    } catch (Exception exception) {
+//		  	      System.out.println(exception.getMessage());
+//		  	    }
+//		      
+//		      myServerRunning = true;
+//		    }
 	  }
 	
 	public static void main(String _args[]) {

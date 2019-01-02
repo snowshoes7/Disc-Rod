@@ -76,19 +76,22 @@ public class DClient extends PApplet {
 	    }
 	    if (receivedText != null && ipEstablished && nameEstablished) { //If text has been received and this client is connected to a server,
 	      //receivedText = "";
-	      
-	      String[] rtarray = receivedText.split(";;;;");
-	      channeltitle = rtarray[0];
-	      //System.out.println(channeltitle);
-	      
-	      String[] tempremovetitle = Arrays.copyOfRange(receivedText.split(";;;;"), 1, receivedText.split(";;;;").length);
-	      receivedTextNoTitle = String.join("", tempremovetitle);
-	      
-	      text(channeltitle, (width/2), 15); //Render the title.
-	      text(receivedTextNoTitle, 0, 15); //Render all received text at 0, 15.
-	      String[] lines = receivedText.split("\r\n|\r|\n");
-	      if (lines.length >= 25) {
-	          receivedText = "";
+	      if (receivedText.equals("[SYS_KICK_501]")) {
+	    	  System.exit(0);
+	      } else {
+	    	  String[] rtarray = receivedText.split(";;;;");
+		      channeltitle = rtarray[0];
+		      //System.out.println(channeltitle);
+		      
+		      String[] tempremovetitle = Arrays.copyOfRange(receivedText.split(";;;;"), 1, receivedText.split(";;;;").length);
+		      receivedTextNoTitle = String.join("", tempremovetitle);
+		      
+		      text(channeltitle, (width/2), 15); //Render the title.
+		      text(receivedTextNoTitle, 0, 15); //Render all received text at 0, 15.
+		      String[] lines = receivedText.split("\r\n|\r|\n");
+		      if (lines.length >= 25) {
+		          receivedText = "";
+		      }
 	      }
 	    }
 	  }
@@ -108,6 +111,7 @@ public class DClient extends PApplet {
 	            if (myText.equals("/exit") || myText.equals("/e")) {
 	              try {
 	                client.write(new String(name + ";" + "[LEAVE_REQUEST/492/USER-INITIATED]").getBytes("UTF-8"));
+	                myText = "";
 	              } catch (Exception e) {
 	                e.printStackTrace();
 	              }
@@ -116,12 +120,21 @@ public class DClient extends PApplet {
 	            else if (myText.startsWith("/msg ")) {
 	              try {
 	                //System.out.println(new String("[BROADCAST] " + myText.substring(5, myText.length())).getBytes("UTF-8"));
-	                client.write(new String("[BROADCAST];" + myText.substring(5, myText.length())).getBytes("UTF-8"));
+	                client.write(new String("[BROADCAST];" + myText.substring(5/*, myText.length()*/)).getBytes("UTF-8"));
 	                myText = ""; //Nullify string myText.
 	              } catch (Exception e) {
 	                e.printStackTrace();
 	              }
 	            }
+	            else if (myText.startsWith("/kick ")) {
+		              try {
+		                //System.out.println(new String("[BROADCAST] " + myText.substring(5, myText.length())).getBytes("UTF-8"));
+		            	client.write(new String(name + ";" + "[KICK_REQUEST/501/USER-INITIATED]" + ";" + myText.substring(6)).getBytes("UTF-8"));
+		                myText = ""; //Nullify string myText.
+		              } catch (Exception e) {
+		                e.printStackTrace();
+		              }
+		            }
 	            else {
 	              try {
 	                //System.out.println(new String(name + ";" + myText).getBytes("UTF-8"));
