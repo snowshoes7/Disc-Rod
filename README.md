@@ -2,9 +2,9 @@ Disc Rod
 
 TODO:
 Add color change commands (ability to change background/text colors) - DONE
-    -Also allow users to change their name's color
-Add a system for keeping track of logged in users (maybe with a list)
-    -Also ensure that all users have unique names with this system
+    -Also allow users to change their name's color - STILL TO DO
+Add a system for keeping track of logged in users (maybe with a list) - DONE
+    -Also ensure that all users have unique names with this system - DONE
 Add a better system for keeping track of who is an admin and who is not
     -Allow the first logged in user to set parameters like who is an admin and
     certain channel title permissions
