@@ -8,9 +8,9 @@ Add a system for keeping track of logged in users (maybe with a list) - DONE
 Add a better system for keeping track of who is an admin and who is not
     -Allow the first logged in user to set parameters like who is an admin and
     certain channel title permissions
-Fix/redo text input system for the client
+Fix/redo text input system for the client - DONE
     -Use an actual GUI element if possible, this would greatly simplify
-    unicode inputs
+    unicode inputs - DONE
 Add different channels and ability to change channels
 Add a scrolling text functionality, eliminating the need to clear the chat
     after 25 lines of text
