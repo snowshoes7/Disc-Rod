@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import processing.net.Client;
 import processing.net.Server;
 
@@ -36,15 +34,27 @@ public class DServer extends PApplet {
 
 	  public String permanentMsg;
 	  
-	  public List<String> admins = new ArrayList<String>();
+	  public List<String> adminnames = new ArrayList<String>();
 	  
-	  public List<String> users = new ArrayList<String>();
+	  public List<String> usernames = new ArrayList<String>();
+	  
+	  //TODO Implement this: public List<User> users = new ArrayList<User>();
 	  
 	  public String toKick;
 
 	  public String ipf;
 	  
 	  public int[] bgColors = new int[3];
+	  
+	  public class User {
+		  public int[] nameColors = new int[3];
+		  public String name;
+		  public String ip;
+		  
+		  public User(String gname) {
+			  this.name = gname;
+		  }
+	  }
 
 	  public void setup()
 	  {
@@ -63,7 +73,7 @@ public class DServer extends PApplet {
 	    
 	    //TODO: TAKE THIS OUT AT SOME POINT AND REPLACE IT WITH A PROPER SYSTEM FOR ADDING ADMINS
 	    //RIGHT NOW ALL IT DOES IS MAKE ANY USER WITH NAME "owen" AN ADMIN
-	    admins.add("owen");
+	    adminnames.add("owen");
 	    
 	  }
 
@@ -103,10 +113,10 @@ public class DServer extends PApplet {
 	            	  //Do the following if and only if the user has NOT been kicked, otherwise give the kicked user no privileges
 		              if (Amsg.split(";")[1].equals("[LEAVE_REQUEST/492/USER-INITIATED]")) {
 		                allData = allData + "\n" + name + " has left the server.";
-		                users.remove(users.indexOf(name));
+		                usernames.remove(usernames.indexOf(name));
 		              } else if (Amsg.split(";")[1].equals("[JOIN_REQUEST/491/USER-INITIATED]")) {
-		            	  if (!(users.contains(name))) {
-		            		  users.add(name);
+		            	  if (!(usernames.contains(name))) {
+		            		  usernames.add(name);
 			                  allData = allData + "\n" + name + " has joined the server.";
 		            	  } else {
 		            		  allData = allData + "\n" + "[DSERVER]: Another user attempted to join with the username " + name + " and was kicked.";
@@ -115,10 +125,10 @@ public class DServer extends PApplet {
 		            	  }
 		              } else if (Amsg.split(";")[0].toString().equals("[BROADCAST]")) {
 		                  allData = allData + "\n" + "[BROADCAST] " + Amsg.split(";")[1].toString();
-		              } else if ((Amsg.split(";")[1].toString().equals("[KICK_REQUEST/501/USER-INITIATED]")) && admins.contains(name.toString())) {
+		              } else if ((Amsg.split(";")[1].toString().equals("[KICK_REQUEST/501/USER-INITIATED]")) && adminnames.contains(name.toString())) {
 		            	  toKick = Amsg.split(";")[2].toString();
 		            	  allData = allData + "\n" + name + " HAS KICKED " + toKick;
-		              } else if ((Amsg.split(";")[1].toString().equals("[KICK_REQUEST/501/USER-INITIATED]")) && !admins.contains(name.toString())) {
+		              } else if ((Amsg.split(";")[1].toString().equals("[KICK_REQUEST/501/USER-INITIATED]")) && !adminnames.contains(name.toString())) {
 		            	  //Do nothing
 		              } else if ((Amsg.split(";")[1].toString().equals("[COLOR_REQUEST/300/USER-INITIATED]"))) {
 		            	  bgColors[0] = Integer.parseInt(Amsg.split(";")[2].split(" ")[0]);
