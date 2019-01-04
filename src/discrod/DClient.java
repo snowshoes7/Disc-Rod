@@ -27,6 +27,8 @@ public class DClient extends PApplet {
 	  //public int mtcount = 0; Explained below.
 	  
 	  public int[] bgColor = new int[]{0, 0, 0};
+	  
+	  public boolean nameReject = false;
 
 	  public String host; //The (local) host IP the user will connect to. Currently null, as the user must specify an IP to connect to at first.
 
@@ -61,16 +63,19 @@ public class DClient extends PApplet {
 	        }
 	      }
 	    }
-	    if (blinkVar >= 10 && blinkVar < 20) {
-	      text(myText + "|", 0, height - 15); //Render user-input text at 0, window height - 15.
-	      blinkVar++;
-	    } else if (blinkVar < 10) {
-	      text(myText, 0, height - 15); //Render user-input text at 0, window height - 15.
-	      blinkVar++;
-	      //System.out.println(blinkVar);
-	    } else if (blinkVar >= 20) {
-	      text(myText, 0, height - 15); //Render user-input text at 0, window height - 15.
-	      blinkVar = 0;
+	    
+	    if (!nameReject) {
+	    	if (blinkVar >= 10 && blinkVar < 20) {
+	  	      text(myText + "|", 0, height - 15); //Render user-input text at 0, window height - 15.
+	  	      blinkVar++;
+	  	    } else if (blinkVar < 10) {
+	  	      text(myText, 0, height - 15); //Render user-input text at 0, window height - 15.
+	  	      blinkVar++;
+	  	      //System.out.println(blinkVar);
+	  	    } else if (blinkVar >= 20) {
+	  	      text(myText, 0, height - 15); //Render user-input text at 0, window height - 15.
+	  	      blinkVar = 0;
+	  	    }
 	    }
 
 	    if (!ipEstablished && !nameEstablished) { //Display a message if not connected to a server.
@@ -83,6 +88,9 @@ public class DClient extends PApplet {
 	      //receivedText = "";
 	      if (receivedText.equals("[SYS_KICK_501]")) {
 	    	  System.exit(0);
+	      } else if (receivedText.equals("[JOIN_REJECT/491E/NAME-CONFLICT]")) {
+	    	  text("You must choose a different name, that one is already taken.", 0, 15);
+	    	  nameReject = true;
 	      } else {
 	    	  String[] rtarray = receivedText.split(";;;;");
 		      channeltitle = rtarray[0];
@@ -91,7 +99,7 @@ public class DClient extends PApplet {
 		      String[] tempremovetitle = Arrays.copyOfRange(receivedText.split(";;;;"), 1, receivedText.split(";;;;").length);
 		      receivedTextNoTitle = String.join("", tempremovetitle);
 		      
-		      text(channeltitle, (width/2), 15); //Render the title.
+		      text(channeltitle, (width/2), 15); //Render the channel title.
 		      
 		      String[] liness = receivedTextNoTitle.split("\r\n|\r|\n");
 		      ArrayList<String> lines = new ArrayList<String>(Arrays.asList(liness));
@@ -125,7 +133,7 @@ public class DClient extends PApplet {
 	  }
 
 	  public void keyPressed() { //Handles all key presses.
-	      if (ipEstablished && nameEstablished) { //If connected,
+	      if (ipEstablished && nameEstablished && !nameReject) { //If connected,
 	        if (keyCode == BACKSPACE) { //Backspace functionality.
 	            if (myText.length() > 0) { //If any text exists,
 	              myText = myText.substring(0, myText.length()-1); //Changes string to a substring of itself that excludes the last character.

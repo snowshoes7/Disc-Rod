@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -36,6 +37,8 @@ public class DServer extends PApplet {
 	  public String permanentMsg;
 	  
 	  public List<String> admins = new ArrayList<String>();
+	  
+	  public List<String> users = new ArrayList<String>();
 	  
 	  public String toKick;
 
@@ -97,11 +100,19 @@ public class DServer extends PApplet {
 	              }
 	              
 	              if (!(name.equals(toKick))) {
-	            	  //Do the following if and only if the user has NOT been kicked
+	            	  //Do the following if and only if the user has NOT been kicked, otherwise give the kicked user no privileges
 		              if (Amsg.split(";")[1].equals("[LEAVE_REQUEST/492/USER-INITIATED]")) {
 		                allData = allData + "\n" + name + " has left the server.";
+		                users.remove(users.indexOf(name));
 		              } else if (Amsg.split(";")[1].equals("[JOIN_REQUEST/491/USER-INITIATED]")) {
-		                  allData = allData + "\n" + name + " has joined the server.";
+		            	  if (!(users.contains(name))) {
+		            		  users.add(name);
+			                  allData = allData + "\n" + name + " has joined the server.";
+		            	  } else {
+		            		  allData = allData + "\n" + "[DSERVER]: Another user attempted to join with the username " + name + " and was kicked.";
+		            		  thisClient.write("[JOIN_REJECT/491E/NAME-CONFLICT]".getBytes("UTF-8"));
+		            		  myServer.disconnect(thisClient);
+		            	  }
 		              } else if (Amsg.split(";")[0].toString().equals("[BROADCAST]")) {
 		                  allData = allData + "\n" + "[BROADCAST] " + Amsg.split(";")[1].toString();
 		              } else if ((Amsg.split(";")[1].toString().equals("[KICK_REQUEST/501/USER-INITIATED]")) && admins.contains(name.toString())) {
@@ -129,7 +140,7 @@ public class DServer extends PApplet {
 	              }
 	              
 	              if (!colorsAdded) {
-	            	  allData = allData + "\n" + "[SYS_COLOR_300] " + bgColors[0] + " " + bgColors[1] + " " + bgColors[2];
+	            	  allData = allData + "\n" + "[SYS_COLOR_300] " + bgColors[0] + " " + bgColors[1] + " " + bgColors[2] + " ";
 	            	  colorsAdded = true;
 	              }
 	              
@@ -160,7 +171,30 @@ public class DServer extends PApplet {
 	      }
 	      String[] tempremovetitle = Arrays.copyOfRange(allData.split(";;;;"), 1, allData.split(";;;;").length);
 	      allDataNoTitle = String.join("", tempremovetitle);
-	      text(allDataNoTitle, 15, 135);
+	      
+	      String[] liness = allDataNoTitle.split("\r\n|\r|\n");
+	      ArrayList<String> lines = new ArrayList<String>(Arrays.asList(liness));
+	      
+	      for (Iterator<String> it = lines.iterator(); it.hasNext();) {
+	    	  String x = it.next();
+	    	  if (x.startsWith("[SYS_COLOR_300]")) {
+//	    		  bgColor[0] = Integer.parseInt(x.split(" ")[1]);
+//	    		  bgColor[1] = Integer.parseInt(x.split(" ")[2]);
+//	    		  bgColor[2] = Integer.parseInt(x.split(" ")[3]);
+	    		  it.remove();
+	    	  }
+	      }
+	      
+	      StringBuilder sb = new StringBuilder();
+	      for (String s : lines)
+	      {
+	          sb.append(s);
+	          sb.append("\n");
+	      }
+	      
+	      String adntnew = sb.toString();
+	      
+	      text(adntnew, 15, 135);
 	    }
 	    else
 	    {
