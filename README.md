@@ -1,7 +1,7 @@
 Disc Rod
 
 TODO:
-Add color change commands (ability to change background/text colors)
+Add color change commands (ability to change background/text colors) - DONE
     -Also allow users to change their name's color
 Add a system for keeping track of logged in users (maybe with a list)
     -Also ensure that all users have unique names with this system
