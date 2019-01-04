@@ -1,6 +1,9 @@
 package discrod;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import processing.core.PApplet;
 
@@ -22,6 +25,8 @@ public class DClient extends PApplet {
 	  public int sendCount = 0;
 	  public int blinkVar = 0;
 	  //public int mtcount = 0; Explained below.
+	  
+	  public int[] bgColor = new int[]{0, 0, 0};
 
 	  public String host; //The (local) host IP the user will connect to. Currently null, as the user must specify an IP to connect to at first.
 
@@ -34,7 +39,7 @@ public class DClient extends PApplet {
 	  }
 
 	  public void draw() { //Run every frame.
-	    background(0);
+	    background(bgColor[0], bgColor[1], bgColor[2]);
 
 	    fill(255);
 
@@ -87,10 +92,33 @@ public class DClient extends PApplet {
 		      receivedTextNoTitle = String.join("", tempremovetitle);
 		      
 		      text(channeltitle, (width/2), 15); //Render the title.
-		      text(receivedTextNoTitle, 0, 15); //Render all received text at 0, 15.
-		      String[] lines = receivedText.split("\r\n|\r|\n");
-		      if (lines.length >= 25) {
-		          receivedText = "";
+		      
+		      String[] liness = receivedTextNoTitle.split("\r\n|\r|\n");
+		      ArrayList<String> lines = new ArrayList<String>(Arrays.asList(liness));
+		      
+		      for (Iterator<String> it = lines.iterator(); it.hasNext();) {
+		    	  String x = it.next();
+		    	  if (x.startsWith("[SYS_COLOR_300]")) {
+		    		  bgColor[0] = Integer.parseInt(x.split(" ")[1]);
+		    		  bgColor[1] = Integer.parseInt(x.split(" ")[2]);
+		    		  bgColor[2] = Integer.parseInt(x.split(" ")[3]);
+		    		  it.remove();
+		    	  }
+		      }
+		      
+		      StringBuilder sb = new StringBuilder();
+		      for (String s : lines)
+		      {
+		          sb.append(s);
+		          sb.append("\n");
+		      }
+		      
+		      String rtntnew = sb.toString();
+		      
+		      text(rtntnew, 0, 15); //Render all received and processed text at 0, 15.
+		      
+		      if (lines.size() >= 25) {
+		          receivedTextNoTitle = "";
 		      }
 	      }
 	    }
@@ -127,14 +155,23 @@ public class DClient extends PApplet {
 	              }
 	            }
 	            else if (myText.startsWith("/kick ")) {
-		              try {
-		                //System.out.println(new String("[BROADCAST] " + myText.substring(5, myText.length())).getBytes("UTF-8"));
-		            	client.write(new String(name + ";" + "[KICK_REQUEST/501/USER-INITIATED]" + ";" + myText.substring(6)).getBytes("UTF-8"));
-		                myText = ""; //Nullify string myText.
-		              } catch (Exception e) {
-		                e.printStackTrace();
-		              }
-		            }
+	              try {
+	                //System.out.println(new String("[BROADCAST] " + myText.substring(5, myText.length())).getBytes("UTF-8"));
+	            	client.write(new String(name + ";" + "[KICK_REQUEST/501/USER-INITIATED]" + ";" + myText.substring(6)).getBytes("UTF-8"));
+	                myText = ""; //Nullify string myText.
+	              } catch (Exception e) {
+	                e.printStackTrace();
+	              }
+		        }
+	            else if (myText.startsWith("/color ")) {
+	              try {
+	                //System.out.println(new String("[BROADCAST] " + myText.substring(5, myText.length())).getBytes("UTF-8"));
+	            	client.write(new String(name + ";" + "[COLOR_REQUEST/300/USER-INITIATED]" + ";" + myText.substring(7)).getBytes("UTF-8"));
+	                myText = ""; //Nullify string myText.
+	              } catch (Exception e) {
+	                e.printStackTrace();
+	              }
+		        }
 	            else {
 	              try {
 	                //System.out.println(new String(name + ";" + myText).getBytes("UTF-8"));

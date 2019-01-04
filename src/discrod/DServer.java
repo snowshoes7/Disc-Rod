@@ -30,6 +30,8 @@ public class DServer extends PApplet {
 	  public String allDataNoTitle;
 	  
 	  public boolean titleAdded = false;
+	  
+	  public boolean colorsAdded = false;
 
 	  public String permanentMsg;
 	  
@@ -38,11 +40,14 @@ public class DServer extends PApplet {
 	  public String toKick;
 
 	  public String ipf;
+	  
+	  public int[] bgColors = new int[3];
 
 	  public void setup()
 	  {
 	    myServer = new Server(this, port); // Starts a myServer on port 10002
-	    background(0);
+	    bgColors = new int[]{0, 0, 0};
+	    background(bgColors[0], bgColors[1], bgColors[2]);
 
 	    try {
 	    URL whatismyip = new URL("http://checkip.amazonaws.com");
@@ -67,7 +72,7 @@ public class DServer extends PApplet {
 	  {
 	    if (myServerRunning == true)
 	    {
-	      background(0);
+	      background(bgColors[0], bgColors[1], bgColors[2]);
 	      text("[SERVER RUNNING]", 15, 45);
 	      text("Connect to " + Server.ip() + " if you want to use LAN.", 15, 65);
 	      text("Otherwise, connect to " + ipf + " for a public internet connection.", 15, 85);
@@ -104,6 +109,13 @@ public class DServer extends PApplet {
 		            	  allData = allData + "\n" + name + " HAS KICKED " + toKick;
 		              } else if ((Amsg.split(";")[1].toString().equals("[KICK_REQUEST/501/USER-INITIATED]")) && !admins.contains(name.toString())) {
 		            	  //Do nothing
+		              } else if ((Amsg.split(";")[1].toString().equals("[COLOR_REQUEST/300/USER-INITIATED]"))) {
+		            	  bgColors[0] = Integer.parseInt(Amsg.split(";")[2].split(" ")[0]);
+		            	  bgColors[1] = Integer.parseInt(Amsg.split(";")[2].split(" ")[1]);
+		            	  bgColors[2] = Integer.parseInt(Amsg.split(";")[2].split(" ")[2]);
+		            	  background(bgColors[0], bgColors[1], bgColors[2]);
+		            	  allData = allData + "\n" + name + " HAS CHANGED THE BACKGROUND COLORS TO " + bgColors[0] + " " + bgColors[1] + " " + bgColors[2] + " ";
+		            	  colorsAdded = false;
 		              } else {
 		                Bmsg = name + " says: " + Amsg.substring(name.length() + 1);
 		                msg = Bmsg;
@@ -114,6 +126,11 @@ public class DServer extends PApplet {
 	              if (!titleAdded) {
 	            	  allData = title + ";;;;" + allData;
 	            	  titleAdded = true;
+	              }
+	              
+	              if (!colorsAdded) {
+	            	  allData = allData + "\n" + "[SYS_COLOR_300] " + bgColors[0] + " " + bgColors[1] + " " + bgColors[2];
+	            	  colorsAdded = true;
 	              }
 	              
 	              try {
