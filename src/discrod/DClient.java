@@ -23,10 +23,10 @@ public class DClient extends PApplet {
 	  public String receivedTextNoTitle;
 	  public int sendCount = 0;
 	  public int blinkVar = 0;
-	  //public int mtcount = 0; Explained below.
 	  
-	  GUIController control;
-	  IFTextField usertext;
+	  public GUIController control;
+	  public IFTextField usertext;
+	  public IFButton sendbtn;
 	  
 	  public int[] bgColor = new int[]{0, 0, 0};
 	  
@@ -35,14 +35,19 @@ public class DClient extends PApplet {
 	  public String host; //The (local) host IP the user will connect to. Currently null, as the user must specify an IP to connect to at first.
 
 	  public void setup() { //Run on the program's start.
+		frame.setTitle("Disc Rod v1.0 Client");
+		
 	    ipEstablished = false; //Re-establish variables, as a failsafe.
 	    nameEstablished = false; //"
 	    sendCount = 0; //"
 	    name = "";
-	    //mtcount = 0; I meant for this to do something, but I'm not entirely sure what.
 	    
 	    control = new GUIController(this);
-		usertext = new IFTextField(myText, 0, height - 30, width - 30);
+		usertext = new IFTextField(myText, 0, height - 30, width - 60);
+		sendbtn = new IFButton("Send", width - 50, height - 30, 40);
+		
+		sendbtn.addActionListener(this);
+		control.add(sendbtn);
 	    
 	    control.add(usertext);
 	    usertext.addActionListener(this);
@@ -93,8 +98,10 @@ public class DClient extends PApplet {
 	    }
 	    if (ipEstablished && !nameEstablished) { //Display a message if not connected to a server.
 	      text("What is your name?", 0, height - 40);
+	      frame.setTitle("Disc Rod v1.0 Client - " + host.toString());
 	    }
 	    if (receivedText != null && ipEstablished && nameEstablished) { //If text has been received and this client is connected to a server,
+	    	frame.setTitle("Disc Rod v1.0 Client - " + host.toString() + " - " + name + " - " + channeltitle);
 	      //receivedText = "";
 	      if (receivedText.equals("[SYS_KICK_501]")) {
 	    	  System.exit(0);
@@ -194,6 +201,16 @@ public class DClient extends PApplet {
 	                e.printStackTrace();
 	              }
 		        }
+	            else if (myText.startsWith("/ipof ")) {
+		              try {
+		                //System.out.println(new String("[BROADCAST] " + myText.substring(5, myText.length())).getBytes("UTF-8"));
+		            	client.write(new String(name + ";" + "[IP_REQUEST/502/USER-INITIATED]" + ";" + myText.substring(6)).getBytes("UTF-8"));
+		            	usertext.setValue("");
+		                myText = ""; //Nullify string myText.
+		              } catch (Exception e) {
+		                e.printStackTrace();
+		              }
+			        }
 	            else {
 	              try {
 	                //System.out.println(new String(name + ";" + myText).getBytes("UTF-8"));
@@ -263,6 +280,114 @@ public class DClient extends PApplet {
 
 	  public void settings() {
 	    size(700, 500); //Establish window size as 700x500.
+	  }
+	  
+	  public void actionPerformed(GUIEvent event) {
+		  if (event.getSource() == sendbtn) {
+			  if (ipEstablished && nameEstablished && !nameReject) {
+				  if (canSend) { //If the user sends a message, and they can send it,
+			            if (myText.equals("/exit") || myText.equals("/e")) {
+			              try {
+			                client.write(new String(name + ";" + "[LEAVE_REQUEST/492/USER-INITIATED]").getBytes("UTF-8"));
+			                usertext.setValue("");
+			                myText = "";
+			              } catch (Exception e) {
+			                e.printStackTrace();
+			              }
+			              System.exit(0);
+			            }
+			            else if (myText.startsWith("/msg ")) {
+			              try {
+			                //System.out.println(new String("[BROADCAST] " + myText.substring(5, myText.length())).getBytes("UTF-8"));
+			                client.write(new String("[BROADCAST];" + myText.substring(5/*, myText.length()*/)).getBytes("UTF-8"));
+			                usertext.setValue("");
+			                myText = ""; //Nullify string myText.
+			              } catch (Exception e) {
+			                e.printStackTrace();
+			              }
+			            }
+			            else if (myText.startsWith("/kick ")) {
+			              try {
+			                //System.out.println(new String("[BROADCAST] " + myText.substring(5, myText.length())).getBytes("UTF-8"));
+			            	client.write(new String(name + ";" + "[KICK_REQUEST/501/USER-INITIATED]" + ";" + myText.substring(6)).getBytes("UTF-8"));
+			            	usertext.setValue("");
+			                myText = ""; //Nullify string myText.
+			              } catch (Exception e) {
+			                e.printStackTrace();
+			              }
+				        }
+			            else if (myText.startsWith("/color ")) {
+			              try {
+			                //System.out.println(new String("[BROADCAST] " + myText.substring(5, myText.length())).getBytes("UTF-8"));
+			            	client.write(new String(name + ";" + "[COLOR_REQUEST/300/USER-INITIATED]" + ";" + myText.substring(7)).getBytes("UTF-8"));
+			            	usertext.setValue("");
+			                myText = ""; //Nullify string myText.
+			              } catch (Exception e) {
+			                e.printStackTrace();
+			              }
+				        }
+			            else {
+			              try {
+			                //System.out.println(new String(name + ";" + myText).getBytes("UTF-8"));
+			                client.write(new String(name + ";" + myText).getBytes("UTF-8"));
+			                usertext.setValue("");
+			                myText = ""; //Nullify string myText.
+			              } catch (Exception e) {
+			                e.printStackTrace();
+			              } //Write name and myText to the connected server through the client object.
+			            }
+			            canSend = false; //Prevent spam by disallowing sending.
+			            sendCount = 0;
+			          }
+			  } else if (!ipEstablished && !nameEstablished) { //If not connected (i.e. the user is clarifying the IP they want to connect to),
+			        //The following are explained above.
+//			        if (keyCode == BACKSPACE) {
+//			            if (myText.length() > 0) {
+//			              myText = myText.substring(0, myText.length()-1);
+//			            }
+//			          } else if (keyCode == DELETE) {
+//			            myText = "";
+//			          } else if (keyCode != SHIFT && keyCode != CONTROL && keyCode != ALT && keyCode != 20 && keyCode != ENTER) {
+//			            myText = myText + key;
+//			          }
+			            //TODO: Check if IP is valid.
+			            host = myText; //Set host string to myText.
+			            usertext.setValue("");
+			            myText = ""; //Nullify myText.
+			            ipEstablished = true;
+			            nameEstablished = false; //Just re-establishing this, for my own sanity.
+			      } else if (ipEstablished && !nameEstablished) {
+//			        if (keyCode == BACKSPACE) {
+//			            if (myText.length() > 0) {
+//			              myText = myText.substring(0, myText.length()-1);
+//			            }
+//			          } else if (keyCode == DELETE) {
+//			            myText = "";
+//			          } else if (keyCode != SHIFT && keyCode != CONTROL && keyCode != ALT && keyCode != 20 && keyCode != ENTER) {
+//			            myText = myText + key;
+//			          }
+			            //TODO: Check if name is valid. (?)
+			            name = myText; //Set name string to myText.
+			            usertext.setValue("");
+			            myText = ""; //Nullify myText.
+			            ipEstablished = true; //Setting this variable once more.
+			            nameEstablished = true; //A name has now been established.
+			            try {
+			              client = new Client(this, host, 10002); //Establish the clientside through Processing.
+			            } catch (Exception exceptionn) {
+			              exceptionn.printStackTrace();
+			              System.out.println("Error. You may have used an invalid address.");
+			              //System.exit(0);
+			            }
+			            try {
+			              client.write(new String(name + ";" + "[JOIN_REQUEST/491/USER-INITIATED]").getBytes("UTF-8"));
+			            } catch (Exception en) {
+			              en.printStackTrace();
+			              System.out.println("Joining the server has failed.");
+			              //System.exit(0);
+			            }
+			      }
+		  }
 	  }
 	
 	public static void main(String _args[]) {

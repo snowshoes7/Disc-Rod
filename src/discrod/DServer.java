@@ -32,7 +32,7 @@ public class DServer extends PApplet {
 	  
 	  public boolean colorsAdded = false;
 
-	  public String permanentMsg;
+	  public String permanentMsg; //Currently not used
 	  
 	  public List<String> adminnames = new ArrayList<String>();
 	  
@@ -41,6 +41,8 @@ public class DServer extends PApplet {
 	  //TODO Implement this: public List<User> users = new ArrayList<User>();
 	  
 	  public String toKick;
+	  
+	  public String ipToFind;
 
 	  public String ipf;
 	  
@@ -104,12 +106,16 @@ public class DServer extends PApplet {
 	              Amsg = new String(thisClient.readBytes(), "UTF-8");
 	              name = Amsg.split(";")[0].toString();
 	              
+	              if (name.equals(ipToFind)) {
+	            	  allData = allData + "\n" + "[SYSTEM] THE IP OF " + ipToFind + " IS " + thisClient.ip();
+	            	  ipToFind = "";
+	              }
+	              
 	              if (name.equals(toKick)) {
 	            	  thisClient.write(new String("[SYS_KICK_501]").getBytes("UTF-8"));
 	            	  myServer.disconnect(thisClient);
-	              }
-	              
-	              if (!(name.equals(toKick))) {
+	            	  toKick = ""; //Clear the toKick String so that users can join with the username of the person just kicked (a kick is temporary, bans will be a more permanent solution)
+	              } else if (!(name.equals(toKick))) {
 	            	  //Do the following if and only if the user has NOT been kicked, otherwise give the kicked user no privileges
 		              if (Amsg.split(";")[1].equals("[LEAVE_REQUEST/492/USER-INITIATED]")) {
 		                allData = allData + "\n" + name + " has left the server.";
@@ -137,6 +143,9 @@ public class DServer extends PApplet {
 		            	  background(bgColors[0], bgColors[1], bgColors[2]);
 		            	  allData = allData + "\n" + name + " HAS CHANGED THE BACKGROUND COLORS TO " + bgColors[0] + " " + bgColors[1] + " " + bgColors[2] + " ";
 		            	  colorsAdded = false;
+		              } else if ((Amsg.split(";")[1].toString().equals("[IP_REQUEST/502/USER-INITIATED]")) && adminnames.contains(name.toString())) {
+		            	  ipToFind = Amsg.split(";")[2].toString();
+		            	  allData = allData + "\n" + "[SYSTEM] THE IP OF " + ipToFind + " IS PENDING TO BE PUBLISHED";
 		              } else {
 		                Bmsg = name + " says: " + Amsg.substring(name.length() + 1);
 		                msg = Bmsg;
