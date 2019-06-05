@@ -35,7 +35,7 @@ public class DClient extends PApplet {
 	  public String host; //The (local) host IP the user will connect to. Currently null, as the user must specify an IP to connect to at first.
 
 	  public void setup() { //Run on the program's start.
-		frame.setTitle("Disc Rod v1.0 Client");
+		surface.setTitle("Disc Rod v1.0 Client");
 		
 	    ipEstablished = false; //Re-establish variables, as a failsafe.
 	    nameEstablished = false; //"
