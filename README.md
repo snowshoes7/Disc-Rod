@@ -29,3 +29,7 @@ Allow users to leave a server and join a different one without closing the
     client
 Add a rank system in which certain colors/priveleges may be given to one or more
     users by name or IP (unlikely to implement this)
+
+KNOWN BUGS:
+    At times, if the background color is changed at the same time the chat log
+    is cleared, the color change will not go through.
