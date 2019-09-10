@@ -1,5 +1,6 @@
 package discrod;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -101,7 +102,7 @@ public class DClient extends PApplet {
 	      frame.setTitle("Disc Rod v1.0 Client - " + host.toString());
 	    }
 	    if (receivedText != null && ipEstablished && nameEstablished) { //If text has been received and this client is connected to a server,
-	    	frame.setTitle("Disc Rod v1.0 Client - " + host.toString() + " - " + name + " - " + channeltitle);
+	    	frame.setTitle("Disc Rod v1.0 Client - " + host.toString() + " - " + name + " - #" + channeltitle);
 	      //receivedText = "";
 	      if (receivedText.equals("[SYS_KICK_501]")) {
 	    	  System.exit(0);
@@ -116,7 +117,7 @@ public class DClient extends PApplet {
 		      String[] tempremovetitle = Arrays.copyOfRange(receivedText.split(";;;;"), 1, receivedText.split(";;;;").length);
 		      receivedTextNoTitle = String.join("", tempremovetitle);
 		      
-		      text(channeltitle, (width/2), 15); //Render the channel title.
+		      text("#" + channeltitle, (width/2), 15); //Render the channel title.
 		      
 		      String[] liness = receivedTextNoTitle.split("\r\n|\r|\n");
 		      ArrayList<String> lines = new ArrayList<String>(Arrays.asList(liness));
@@ -211,6 +212,15 @@ public class DClient extends PApplet {
 		                e.printStackTrace();
 		              }
 			        }
+	            else if (myText.startsWith("/channel")) { //TODO uh oh
+	            	if (myText.split(" ")[1].equals("change")) {
+	            		try {
+							client.write(new String(name + ";" + "[CHANNEL_CHANGE_REQUEST/401/USER-INITIATED]" + ";" + myText.split(" ")[2]).getBytes("UTF-8"));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+	            	}
+	            }
 	            else {
 	              try {
 	                //System.out.println(new String(name + ";" + myText).getBytes("UTF-8"));

@@ -25,7 +25,7 @@ public class DServer extends PApplet {
 	  public Server myServer;
 
 	  public String allData = "[DATA START]";
-	  public String title = "Main Channel";
+	  public String title = "main-channel";
 	  public String allDataNoTitle;
 	  
 	  public boolean titleAdded = false;
@@ -37,6 +37,8 @@ public class DServer extends PApplet {
 	  public List<String> adminnames = new ArrayList<String>();
 	  
 	  public List<String> usernames = new ArrayList<String>();
+	  
+	  public List<String> channels = new ArrayList<String>();
 	  
 	  //TODO Implement this: public List<User> users = new ArrayList<User>();
 	  
@@ -76,7 +78,7 @@ public class DServer extends PApplet {
 	    //TODO: TAKE THIS OUT AT SOME POINT AND REPLACE IT WITH A PROPER SYSTEM FOR ADDING ADMINS
 	    //RIGHT NOW ALL IT DOES IS MAKE ANY USER WITH NAME "owen" AN ADMIN
 	    adminnames.add("owen");
-	    
+	    channels.add("main-channel");
 	  }
 
 	  public void settings() {
@@ -146,6 +148,8 @@ public class DServer extends PApplet {
 		              } else if ((Amsg.split(";")[1].toString().equals("[IP_REQUEST/502/USER-INITIATED]")) && adminnames.contains(name.toString())) {
 		            	  ipToFind = Amsg.split(";")[2].toString();
 		            	  allData = allData + "\n" + "[SYSTEM] THE IP OF " + ipToFind + " IS PENDING TO BE PUBLISHED";
+		              } else if ((Amsg.split(";")[1].toString().equals("[CHANNEL_CHANGE_REQUEST/401/USER-INITIATED]"))) {//TODO uh oh
+		            	  
 		              } else {
 		                Bmsg = name + " says: " + Amsg.substring(name.length() + 1);
 		                msg = Bmsg;
