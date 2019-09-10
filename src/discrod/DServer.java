@@ -145,9 +145,14 @@ public class DServer extends PApplet {
 		            	  background(bgColors[0], bgColors[1], bgColors[2]);
 		            	  allData = allData + "\n" + name + " HAS CHANGED THE BACKGROUND COLORS TO " + bgColors[0] + " " + bgColors[1] + " " + bgColors[2] + " ";
 		            	  colorsAdded = false;
-		              } else if ((Amsg.split(";")[1].toString().equals("[IP_REQUEST/502/USER-INITIATED]")) && adminnames.contains(name.toString())) {
-		            	  ipToFind = Amsg.split(";")[2].toString();
-		            	  allData = allData + "\n" + "[SYSTEM] THE IP OF " + ipToFind + " IS PENDING TO BE PUBLISHED";
+		              } else if ((Amsg.split(";")[1].toString().equals("[IP_REQUEST/502/USER-INITIATED]"))) {
+		            	  if (adminnames.contains(name.toString())) {
+		            		  ipToFind = Amsg.split(";")[2].toString();
+			            	  allData = allData + "\n" + "[DSERVER]: THE IP OF " + ipToFind + " IS PENDING TO BE PUBLISHED";
+		            	  }
+		            	  else if (!(adminnames.contains(name.toString()))) {
+		            		  //Do nothing
+		            	  }
 		              } else if ((Amsg.split(";")[1].toString().equals("[CHANNEL_CHANGE_REQUEST/401/USER-INITIATED]"))) {//TODO uh oh
 		            	  
 		              } else {
