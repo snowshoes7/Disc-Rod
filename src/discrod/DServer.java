@@ -40,7 +40,7 @@ public class DServer extends PApplet {
 	  
 	  public List<String> channels = new ArrayList<String>();
 	  
-	  //TODO Implement this: public List<User> users = new ArrayList<User>();
+	  public List<User> users = new ArrayList<User>(); //TODO This is still not great
 	  
 	  public String toKick;
 	  
@@ -55,8 +55,13 @@ public class DServer extends PApplet {
 		  public String name;
 		  public String ip;
 		  
-		  public User(String gname) {
+		  public User(String gname, String gip) {
 			  this.name = gname;
+			  this.ip = gip;
+		  }
+		  
+		  public String toString() {
+			  return this.name + " " + this.ip;
 		  }
 	  }
 
@@ -108,23 +113,27 @@ public class DServer extends PApplet {
 	              Amsg = new String(thisClient.readBytes(), "UTF-8");
 	              name = Amsg.split(";")[0].toString();
 	              
-	              if (name.equals(ipToFind)) {
+	              /*if (name.equals(ipToFind)) {
 	            	  allData = allData + "\n" + "[SYSTEM] THE IP OF " + ipToFind + " IS " + thisClient.ip();
 	            	  ipToFind = "";
-	              }
+	              }*/
 	              
 	              if (name.equals(toKick)) {
 	            	  thisClient.write(new String("[SYS_KICK_501]").getBytes("UTF-8"));
 	            	  myServer.disconnect(thisClient);
+	            	  //TODO This needs to remove from users and usernames
 	            	  toKick = ""; //Clear the toKick String so that users can join with the username of the person just kicked (a kick is temporary, bans will be a more permanent solution)
 	              } else if (!(name.equals(toKick))) {
 	            	  //Do the following if and only if the user has NOT been kicked, otherwise give the kicked user no privileges
 		              if (Amsg.split(";")[1].equals("[LEAVE_REQUEST/492/USER-INITIATED]")) {
 		                allData = allData + "\n" + name + " has left the server.";
 		                usernames.remove(usernames.indexOf(name));
+		                users.remove(users.indexOf(new User(name, thisClient.ip()))); //TODO Verify that this works
 		              } else if (Amsg.split(";")[1].equals("[JOIN_REQUEST/491/USER-INITIATED]")) {
 		            	  if (!(usernames.contains(name))) {
 		            		  usernames.add(name);
+		            		  users.add(new User(name, thisClient.ip()));
+		            		  System.out.println(new User(name, thisClient.ip())); //TODO needs further testing
 			                  allData = allData + "\n" + name + " has joined the server.";
 		            	  } else {
 		            		  allData = allData + "\n" + "[DSERVER]: Another user attempted to join with the username " + name + " and was kicked.";
@@ -146,9 +155,17 @@ public class DServer extends PApplet {
 		            	  allData = allData + "\n" + name + " HAS CHANGED THE BACKGROUND COLORS TO " + bgColors[0] + " " + bgColors[1] + " " + bgColors[2] + " ";
 		            	  colorsAdded = false;
 		              } else if ((Amsg.split(";")[1].toString().equals("[IP_REQUEST/502/USER-INITIATED]"))) {
-		            	  if (adminnames.contains(name.toString())) {
+		            	  if (adminnames.contains(name.toString()) /*TODO This needs to be changed to user objects, not just names*/) {
 		            		  ipToFind = Amsg.split(";")[2].toString();
-			            	  allData = allData + "\n" + "[DSERVER]: THE IP OF " + ipToFind + " IS PENDING TO BE PUBLISHED";
+		            		  String givenIP = "not available";
+		            		  for (User x : users) {
+		            			  if (x.name.equals(ipToFind)) {
+		            				  givenIP = x.ip;
+		            				  break;
+		            			  }
+		            		  }
+			            	  allData = allData + "\n" + "[DSERVER to ADMINS]: THE IP OF " + ipToFind + " IS " + givenIP; //TODO This needs to write ONLY to admins, not to the entire server.
+			            	  ipToFind = "";
 		            	  }
 		            	  else if (!(adminnames.contains(name.toString()))) {
 		            		  //Do nothing
